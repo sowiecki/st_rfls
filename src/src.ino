@@ -9,8 +9,13 @@
 #define FADE_TIME 1
 #define TUNING 8 // Tunes range-finding to cm distance between pixels
 #define FPS 50
+#define NUM_PIXELS 50
 
-Adafruit_NeoPixel strip = Adafruit_NeoPixel(100, PIN, NEO_GRB + NEO_KHZ800);
+Adafruit_NeoPixel strip = Adafruit_NeoPixel(NUM_PIXELS, PIN, NEO_GRB + NEO_KHZ800);
+
+int reds[NUM_PIXELS];
+int greens[NUM_PIXELS];
+int blues[NUM_PIXELS];
 
 void setup() {
   Serial.begin(9600);
@@ -21,6 +26,8 @@ void setup() {
   if (F_CPU == 16000000)
     clock_prescale_set(clock_div_1);
 #endif
+
+  initColors();
 
   strip.begin();
   strip.show();
@@ -47,15 +54,23 @@ void colorWipe() {
   }
 }
 
+void initColors() {
+  for (int i = 0; i < strip.numPixels(); i++) {
+    reds[i] = random(256);
+    greens[i] = random(256);
+    blues[i] = random(256);
+  }
+}
+
 void simUpsideDownTouch(uint8_t pixel) {
   colorWipe();
 
-  int red = random(256);
-  int green = random(256);
-  int blue = random(256);
+  int red = reds[pixel];
+  int green = greens[pixel];
+  int blue = blues[pixel];
   
   for (uint8_t fade = 0; fade < FPS; fade++) {
-    int brightness = fade * 3;
+    int brightness = fade;
     strip.setPixelColor(pixel - 1, red - brightness, green - brightness, blue - brightness);
     strip.setPixelColor(pixel, red - brightness, green - brightness, blue - brightness);
     strip.setPixelColor(pixel + 1, red - brightness, green - brightness, blue - brightness);
@@ -64,7 +79,7 @@ void simUpsideDownTouch(uint8_t pixel) {
   }
 
   for (uint8_t fade = FPS; fade > 0; fade--) {
-    int brightness = fade * 3;
+    int brightness = fade;
     strip.setPixelColor(pixel - 1, red - brightness, green - brightness, blue - brightness);
     strip.setPixelColor(pixel, red - brightness, green - brightness, blue - brightness);
     strip.setPixelColor(pixel + 1, red - brightness, green - brightness, blue - brightness);
