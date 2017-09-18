@@ -7,15 +7,13 @@
 #define TRIG_PIN 1 // Actually TX on Makerfocus D1 Mini
 #define ECHO_PIN 0 // Actually D3 on Makerfocus D1 Mini
 #define FADE_TIME 1
-#define TUNING 8 // Tunes range-finding to cm distance between pixels
+#define TUNING 9 // Tunes range-finding to cm distance between pixels
 #define FPS 50
 #define NUM_PIXELS 50
 
 Adafruit_NeoPixel strip = Adafruit_NeoPixel(NUM_PIXELS, PIN, NEO_GRB + NEO_KHZ800);
 
-int reds[NUM_PIXELS];
-int greens[NUM_PIXELS];
-int blues[NUM_PIXELS];
+int colors[NUM_PIXELS];
 
 void setup() {
   Serial.begin(9600);
@@ -56,33 +54,27 @@ void colorWipe() {
 
 void initColors() {
   for (int i = 0; i < strip.numPixels(); i++) {
-    reds[i] = random(256);
-    greens[i] = random(256);
-    blues[i] = random(256);
+    int rgb = random(3);
+    int r = rgb == 0 ? 255 : 0;
+    int g = rgb == 1 ? 255 : 0;
+    int b = rgb == 2 ? 255 : 0;
+    colors[i] = strip.Color(r, g, b);
   }
 }
 
 void simUpsideDownTouch(uint8_t pixel) {
   colorWipe();
 
-  int red = reds[pixel];
-  int green = greens[pixel];
-  int blue = blues[pixel];
-  
   for (uint8_t fade = 0; fade < FPS; fade++) {
     int brightness = fade;
-    strip.setPixelColor(pixel - 1, red - brightness, green - brightness, blue - brightness);
-    strip.setPixelColor(pixel, red - brightness, green - brightness, blue - brightness);
-    strip.setPixelColor(pixel + 1, red - brightness, green - brightness, blue - brightness);
+    strip.setPixelColor(pixel, colors[pixel]);
     strip.show();
     delay(FADE_TIME);
   }
 
   for (uint8_t fade = FPS; fade > 0; fade--) {
     int brightness = fade;
-    strip.setPixelColor(pixel - 1, red - brightness, green - brightness, blue - brightness);
-    strip.setPixelColor(pixel, red - brightness, green - brightness, blue - brightness);
-    strip.setPixelColor(pixel + 1, red - brightness, green - brightness, blue - brightness);
+    strip.setPixelColor(pixel, colors[pixel]);
     strip.show();
     delay(FADE_TIME);
   }

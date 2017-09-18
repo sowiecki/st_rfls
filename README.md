@@ -1,6 +1,7 @@
 # Stranger Things "Touch"-Sensative Light Strand Halloween Decoration
 
-![](https://media.giphy.com/media/3ohhwDOhbwbhUozFSw/giphy.gif)
+![](./stranger_things_reference.gif)
+![](./demo.gif)
 
 ### Hardware
 * [Ultrasonic Ranging Module HC-SR04](http://www.micropik.com/PDF/HCSR04.pdf) ([Amazon link](https://smile.amazon.com/gp/product/B00UJA1TAQ))
