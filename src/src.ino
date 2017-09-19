@@ -11,7 +11,7 @@
 #define TUNING 9 // Tunes range-finding to cm distance between pixels
 #define FPS 50
 #define NUM_PIXELS 50
-#define TRAIL_LENGTH 10
+#define TRAIL_LENGTH 4
 
 Adafruit_NeoPixel strip = Adafruit_NeoPixel(NUM_PIXELS, PIN, NEO_GRB + NEO_KHZ800);
 
@@ -23,10 +23,10 @@ void setup() {
   pinMode(TRIG_PIN, OUTPUT);
   pinMode(ECHO_PIN, INPUT);
 
-#if defined(__AVR_ATtiny85__)
-  if (F_CPU == 16000000)
-    clock_prescale_set(clock_div_1);
-#endif
+  #if defined(__AVR_ATtiny85__)
+    if (F_CPU == 16000000)
+      clock_prescale_set(clock_div_1);
+  #endif
 
   initColors();
 
@@ -52,19 +52,19 @@ void loop() {
 void colorWipe(uint8_t pixel) {
    std::rotate(trailingPixels, trailingPixels + TRAIL_LENGTH - 1, trailingPixels + TRAIL_LENGTH);
    trailingPixels[0] = pixel;
-   
+
   for (uint8_t i = 0; i < strip.numPixels(); i++) {
     int *leaveLit = std::find(std::begin(trailingPixels), std::end(trailingPixels), pixel);
-    
+
 //    if (leaveLit == std::end(trailingPixels)) {
-    strip.setPixelColor(i, 0);
+      strip.setPixelColor(i, 0);
 //    }
   }
 }
 
 void initColors() {
   for (int i = 0; i < strip.numPixels(); i++) {
-    int rgb = random(5);
+    int rgb = i % 5;
     switch (rgb) {
       case 0:
         colors[i] = strip.Color(255, 0, 0);
@@ -79,7 +79,7 @@ void initColors() {
         colors[i] = strip.Color(255, 255, 0);
         break;
       case 4:
-        colors[i] = strip.Color(255, 0, 255);
+        colors[i] = strip.Color(0, 255, 255);
         break;
     }
   }
