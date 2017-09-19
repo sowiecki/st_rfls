@@ -1,6 +1,6 @@
 # Stranger Things "Touch"-Sensative Light Strand Halloween Decoration
 
-![](./stranger_things_reference.gif)
+[![](./stranger_things_reference.gif)](https://www.youtube.com/watch?v=ihhJAQzysuk)
 ![](./demo.gif)
 
 ### Hardware

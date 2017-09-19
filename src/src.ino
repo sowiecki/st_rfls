@@ -1,4 +1,5 @@
 #include <Adafruit_NeoPixel.h>
+#include <algorithm>
 #ifdef __AVR__
 #include <avr/power.h>
 #endif
@@ -10,10 +11,12 @@
 #define TUNING 9 // Tunes range-finding to cm distance between pixels
 #define FPS 50
 #define NUM_PIXELS 50
+#define TRAIL_LENGTH 10
 
 Adafruit_NeoPixel strip = Adafruit_NeoPixel(NUM_PIXELS, PIN, NEO_GRB + NEO_KHZ800);
 
 int colors[NUM_PIXELS];
+int trailingPixels[TRAIL_LENGTH];
 
 void setup() {
   Serial.begin(9600);
@@ -46,24 +49,44 @@ void loop() {
   simUpsideDownTouch(floor(distance) / TUNING);
 }
 
-void colorWipe() {
-  for (uint8_t pixel = 0; pixel < strip.numPixels(); pixel++) {
-    strip.setPixelColor(pixel, 0);
+void colorWipe(uint8_t pixel) {
+   std::rotate(trailingPixels, trailingPixels + TRAIL_LENGTH - 1, trailingPixels + TRAIL_LENGTH);
+   trailingPixels[0] = pixel;
+   
+  for (uint8_t i = 0; i < strip.numPixels(); i++) {
+    int *leaveLit = std::find(std::begin(trailingPixels), std::end(trailingPixels), pixel);
+    
+//    if (leaveLit == std::end(trailingPixels)) {
+    strip.setPixelColor(i, 0);
+//    }
   }
 }
 
 void initColors() {
   for (int i = 0; i < strip.numPixels(); i++) {
-    int rgb = random(3);
-    int r = rgb == 0 ? 255 : 0;
-    int g = rgb == 1 ? 255 : 0;
-    int b = rgb == 2 ? 255 : 0;
-    colors[i] = strip.Color(r, g, b);
+    int rgb = random(5);
+    switch (rgb) {
+      case 0:
+        colors[i] = strip.Color(255, 0, 0);
+        break;
+      case 1:
+        colors[i] = strip.Color(0, 255, 0);
+        break;
+      case 2:
+        colors[i] = strip.Color(0, 0, 255);
+        break;
+      case 3:
+        colors[i] = strip.Color(255, 255, 0);
+        break;
+      case 4:
+        colors[i] = strip.Color(255, 0, 255);
+        break;
+    }
   }
 }
 
 void simUpsideDownTouch(uint8_t pixel) {
-  colorWipe();
+  colorWipe(pixel);
 
   for (uint8_t fade = 0; fade < FPS; fade++) {
     int brightness = fade;
