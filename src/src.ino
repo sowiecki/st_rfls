@@ -11,12 +11,14 @@
 #define TUNING 9 // Tunes range-finding to cm distance between pixels
 #define FPS 50
 #define NUM_PIXELS 50
-#define TRAIL_LENGTH 4
+#define TRAIL_LENGTH 11
 
 Adafruit_NeoPixel strip = Adafruit_NeoPixel(NUM_PIXELS, PIN, NEO_GRB + NEO_KHZ800);
 
 int colors[NUM_PIXELS];
 int trailingPixels[TRAIL_LENGTH];
+int trailingIndex = 0;
+int trailLength = sizeof(trailingPixels) / sizeof(trailingPixels[0]);
 
 void setup() {
   Serial.begin(9600);
@@ -46,19 +48,38 @@ void loop() {
   duration = pulseIn(ECHO_PIN, HIGH);
   distance = (duration / 2) * 0.0344;
 
-  simUpsideDownTouch(floor(distance) / TUNING);
+  int8_t pixel = floor(distance) / TUNING;
+  simUpsideDownTouch(pixel);
+  colorWipe(pixel);
 }
 
 void colorWipe(uint8_t pixel) {
-   std::rotate(trailingPixels, trailingPixels + TRAIL_LENGTH - 1, trailingPixels + TRAIL_LENGTH);
-   trailingPixels[0] = pixel;
+  bool alreadyLit = false;    
+  for(const int &i : trailingPixels) {
+    if (trailingPixels[i] == pixel || pixel > strip.numPixels()) {
+      alreadyLit = true;
+    }
+  }
+  if (!alreadyLit) {
+    trailingPixels[trailingIndex] = pixel;
+
+    trailingIndex++;
+    if (trailingIndex > trailLength) {
+      trailingIndex = 0; 
+    }
+  }
 
   for (uint8_t i = 0; i < strip.numPixels(); i++) {
-    int *leaveLit = std::find(std::begin(trailingPixels), std::end(trailingPixels), pixel);
+    bool leaveLit = false;
+    for(const int &i : trailingPixels) {
+      if (trailingPixels[i] == pixel) {
+        leaveLit = true;
+      }
+    }
 
-//    if (leaveLit == std::end(trailingPixels)) {
+    if (!leaveLit) {
       strip.setPixelColor(i, 0);
-//    }
+    }
   }
 }
 
@@ -86,8 +107,6 @@ void initColors() {
 }
 
 void simUpsideDownTouch(uint8_t pixel) {
-  colorWipe(pixel);
-
   for (uint8_t fade = 0; fade < FPS; fade++) {
     int brightness = fade;
     strip.setPixelColor(pixel, colors[pixel]);
